@@ -1,0 +1,630 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <!-- burada oyunun başlangic sayfasi icin gerekli html kodlari bulunmaktadir -->
+        <div id="menu">
+            <h1>RushMan</h1>
+            <p id ="hikaye-metni"><i>Bir gün ormanın derinliklerinden uyanan Ogre,  üstünde uyuduğu platformun harekete başladığını ve üstüne buz golemleri geldiğini görür ...</i></p>
+            <button id="start">Oyuna Başla</button>
+            <h5 id="nasil">Nasıl Oynanır?</h5>
+          
+            <p id="bilgi"><i>Ogre'yi hareket ettirmek icin "W", "A", "D" tuşları kullanılır.</i> </p>
+            <p id="bilgi2"><i>Zıplamak icin birden fazla kez "W" tuşuna basılabilir</i></p>
+           <p id="bilgi3"><i>Düşmanlar mouse ile tıklanarak yok olur!</i></p>
+          </div>
+        
+</div>
+         
+        <style>
+            body{
+                margin : 0;
+                background-color : orange
+                
+            }
+           h1 {
+            color: white;
+            font-size : 6rem;
+            margin-top : 15%;
+            text-shadow : 20px 20px 18px rgba(17, 23, 212, 0.3);
+            text-align: center;
+           }
+           #hikaye-metni{
+         position : absolute;
+         top: 20%;
+         left : 10%;
+         right: 75%;
+         font-size: 24px;
+         color: white;
+         font-family: 'Times New Roman', Times, serif;
+         animation-name: kayma;
+         animation-duration: 1s;
+         text-shadow: 2px 2px 18px rgb(88, 27, 231);
+
+            
+           }
+           
+
+           @keyframes kayma {
+            from{
+                top : -100%;
+            }
+            to {
+                top : 20%;
+            }
+           }
+           #nasil 
+           {
+            position : absolute;
+            top: 15%;
+            left : 80%;
+            right : 10%;
+            font-size : 24px;
+            color : white;
+            font-family: 'Times New Roman', Times, serif;
+            text-shadow: 2px 2px 18px rgb(88, 27, 231);
+            display:block;
+           
+
+           }
+           
+           #bilgi
+           {
+            position: absolute;
+            display:flex;
+            top: 30%;
+            left : 80%;
+            right : 10%;
+            align-items: baseline;
+            color : white;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            
+           }
+           #bilgi2
+           {
+            position: absolute;
+            display:flex;
+           top: 55%;
+            left : 80%;
+            right : 10%;
+            align-items: baseline;
+            color : white;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            
+           }
+           #bilgi3
+           {
+            position: absolute;
+            display:flex;
+           top: 75%;
+            left : 80%;
+            right : 10%;
+            align-items: baseline;
+            color : white;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+           }
+           
+         
+           #start {
+            background-color: #ffd633;
+        border: none;
+        color: #555555;
+        font-size: 2rem;
+        margin-top: 5%;
+        padding: 1rem 2rem;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        display: block;
+        margin: 0 auto;
+           }
+           #start:hover {
+        background-color: #ffc107;
+        cursor: pointer;
+      }
+        </style>
+        <canvas id="canvam"></canvas>
+        
+        <script>
+  var startButton = document.getElementById("start");
+  var divblok = document.getElementById("menu");
+  
+ 
+
+
+startButton.addEventListener("click", startGame);
+
+
+
+   
+
+// click eventlistener ile startgame başlatılmaktadır.
+function startGame(){
+   startButton.style.display = "none"
+   divblok.style.display = "none"
+    // oyuncunun yere düşmesi için yer çekimi değeri bu değer oyuncu hızı ile işlem görmektedir.
+            const gravity = 1;
+
+            // gorsel olarak gerekli tanımlar
+            var anakarakter = new Image()
+            anakarakter.src = "resimler/Golem_01_Walking_007.png"
+            var arkaplan = new Image()
+            arkaplan.src = "resimler/background.png"
+
+            var platformresmi = new Image()
+            platformresmi.src = "resimler/platform.png"
+
+            var dusmanresmi = new Image()
+            dusmanresmi.src = "resimler/dusman.png"
+
+            var crosshair = new Image()
+            crosshair.src = "resimler/crosshair.png"
+
+    // canva elementi tanımları ve ekran boyutunun alınması
+            var canvas = document.getElementById("canvam");
+            var ctx = canvas.getContext("2d");
+            canvas.height = innerHeight
+            canvas.width = innerWidth
+          
+            class Oyuncu {
+                constructor()
+                {
+                    this.position = {
+                        x : 100,
+                        y : 40
+                    }
+                    // oyuncu animasyonu için gerekli resimler eklenmiştir
+                    this.golemSpriteArray = [];
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[0].src = "resimler/Golem_01_Walking_000.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[1].src = "resimler/Golem_01_Walking_002.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[2].src = "resimler/Golem_01_Walking_003.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[3].src = "resimler/Golem_01_Walking_005.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[4].src = "resimler/Golem_01_Walking_007.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[5].src = "resimler/Golem_01_Walking_011.png"
+                    this.golemSpriteArray.push(new Image());
+                    this.golemSpriteArray[6].src = "resimler/Golem_01_Walking_015.png"
+                   
+
+                  
+                    this.width = 100
+                    this.height = 125
+                    this.isGameOver = false;
+
+                    this.velocity = {
+                        x  :0,
+                        y  :0
+                    }
+                    this.golemSpriteTimer = 0;
+                    this.currentGolemSpriteIndex = 0;
+                    this.golemSprites = [
+                    "resimler/Golem_01_Walking_000.png",
+                    "resimler/Golem_01_Walking_002.png",
+                    "resimler/Golem_01_Walking_003.png",
+                    "resimler/Golem_01_Walking_005.png",
+                    "resimler/Golem_01_Walking_007.png",
+                    "resimler/Golem_01_Walking_011.png",
+                    "resimler/Golem_01_Walking_015.png"
+                    ];
+                    // ilk golem spriteni alıyoruz
+
+                    this.golemSprite = new Image();
+                    this.golemSprite.src = this.golemSprites[this.currentGolemSpriteIndex];
+
+
+                   
+                }
+   
+                draw ()
+                {
+ 
+                ctx.drawImage(this.golemSprite,this.position.x,this.position.y,this.width,this.height)
+                }
+      // update fonksiyonu animatedan sürekli çağrılacak ve oyuncuyu çizecektir.
+                update ()
+                {
+                    this.draw()
+                    this.position.y  += this.velocity.y;
+                    this.position.x += this.velocity.x;
+                    // ekran içindeyse her zaman yere düşer
+                if(this.position.y + this.height + this.velocity.y <= canvas.height && this.velocity.y + this.position.y >= 0)
+                    this.velocity.y += gravity;
+                  // ekran içinde değilse game over
+                else {
+         
+                 this.velocity.y = 0;
+
+            this.isGameOver = true;
+                }
+
+                this.golemSpriteTimer++;
+                // her bir sprite kaç frame oynatılacak
+                if(this.golemSpriteTimer >=5)
+                {
+                    this.golemSpriteTimer = 0;
+                    this.currentGolemSpriteIndex++;
+                }
+                if(this.currentGolemSpriteIndex >= this.golemSprites.length)
+                {
+                    this.currentGolemSpriteIndex = 0;
+                }
+                this.golemSprite.src = this.golemSprites[this.currentGolemSpriteIndex];
+                }
+            }
+
+            // background sınıfı constructor ile bütün bir alanı kaplayacak şeklinde ayarlanir.
+            
+
+            class Background{
+                constructor(oyunuzunluk,oyungenislik){
+                    this.oyunuzunluk= canvas.width
+                    this.oyungenislik= canvas.height
+                    this.arkaplan = arkaplan
+
+                    this.position = {
+                        x :0,
+                        y : 0 
+                    }
+
+                    this.width = 2400
+                    this.height = 720
+                    
+
+                }
+                draw ()
+                {
+                    ctx.drawImage(this.arkaplan,this.position.x,this.position.y,this.width,this.height)
+                }
+               
+            }
+
+            // Düşmanlar  rasgele oluşturulur ve çizilir 
+
+            class Dusmanlar {
+                constructor()
+                {
+                    this.dusmanresmi = dusmanresmi
+                    this.width = 85
+                this.height = 150
+                this.yasamak = true;
+                   this.position = {
+                    x: canvas.width - this.width,
+             y: Math.floor(Math.random() * (canvas.height - this.height)),
+                    }
+                
+                }
+
+                draw ()
+                {
+                    
+                    ctx.drawImage(this.dusmanresmi, this.position.x, this.position.y, this.width, this.height)
+                    
+                }
+            }
+     // skor sınıfı
+            class Skor{
+                constructor()
+                {
+                    this.skor = 0;
+                }
+                // skor çizilir
+                draw()
+                {
+                    ctx.font = "bold 20px Arial";
+                     ctx.fillStyle = "white";
+                ctx.fillText("Skorunuz: " + this.skor, 100, 100);
+
+                
+                }
+                // tıklandığı zaman skor arttiriliyor
+                arttir(dusman)
+                {
+                    if(dusman.yasamak == false)
+                    {
+                        this.skor++;
+                    }
+                    // skor 10 olursa ana ekrana döndürülüyor 3 sn sonra
+                    if(this.skor == 10)
+                    {
+                        setInterval(function()
+                        {
+                            location.reload();
+                        },3000)
+                        const tebriklerDiv = document.createElement("div");
+tebriklerDiv.innerText = "Tebrikler! Kazandınız Oyununuz Yeniden Başlatılacaktır!";
+tebriklerDiv.style.position = "absolute";
+tebriklerDiv.style.top = "50%";
+tebriklerDiv.style.left = "50%";
+tebriklerDiv.style.transform = "translate(-50%, -50%)";
+tebriklerDiv.style.color = "white";
+tebriklerDiv.style.fontSize = "75px";
+tebriklerDiv.style.fontFamily = "Arial";
+tebriklerDiv.style.textAlign = "center";
+document.body.appendChild(tebriklerDiv);
+                        
+                    }
+
+                   
+                }
+
+              
+
+            }
+            // platformlar pozisyonu ayarlanır ve çizilir
+ 
+            class Platform {
+                constructor(x,y){
+                    this.position = {
+                        x : x,
+                        y : y
+                    },
+
+                    this.width = 600,
+                    this.height = 50,
+
+                    this.platformresmi = platformresmi
+                }
+                    draw()
+                    {
+                        ctx.drawImage(this.platformresmi, this.position.x,this.position.y,this.width,this.height)
+                    }
+
+                 
+            }
+            // ilk başlandığında 3 platform oluşturulur.
+
+          var oyuncu = new Oyuncu()
+          var backgroundd = new Background()
+          var platforms = [new Platform(10,250),
+          new Platform(450,450),
+          new Platform(1000,650),
+        
+        ]    
+        var dusmanlar = [];
+
+        var skor = new Skor()
+
+        
+// her 50ms'de mesafe olcucu belirli degerler saglandiğinda ekranda rastgele olacak şekilde platform oluşturur.
+
+         setInterval(function() {
+  var x = Math.random() * canvas.width;
+  var y = Math.random() * canvas.height;
+
+  var oncekiplatform = platforms[platforms.length - 1]
+  var mesafeolcucu = x  - (oncekiplatform.position.x + oncekiplatform.width)
+ if(mesafeolcucu >= 100 && mesafeolcucu <=300  && y > oyuncu.position.y + oyuncu.velocity.y)
+ {
+     var newPlatform = new Platform(x, y);
+     platforms.push(newPlatform);
+     
+
+ }
+}, 50);
+
+// her 2 sn'de yeni düşman oluşturulur
+
+setInterval(function(){
+    var dusman = new Dusmanlar();
+    dusmanlar.push(dusman);
+},2000)
+
+canvas.addEventListener("click", function(e){
+    var xkonumu = e.clientX - canvas.offsetLeft;
+    var ykonumu = e.clientY - canvas.offsetTop;
+
+    dusmanlar.forEach(function (dusman, index){
+        var dusmansol = dusman.position.x;
+        var dusmansag = dusman.position.x + dusman.width
+        var dusmantop = dusman.position.y
+        var dusmanbottom = dusman.position.y + dusman.height
+        // eğer düşman üzerine tıklanırsa düşman ölür, ekrandan silinir, diziden silinir
+        if(xkonumu >= dusmansol && xkonumu <= dusmansag && ykonumu >= dusmantop && ykonumu <= dusmanbottom)
+        {
+            ctx.clearRect(dusman.position.x, dusman.position.y, dusman.width, dusman.height);
+            dusman.yasamak = false;
+            skor.arttir(dusman);
+            dusmanlar.splice(index, 1);
+        }
+    })
+
+})
+
+
+
+          var tuslar = {
+           sol : {
+              pressed : false  
+            },
+           sag : {
+              pressed : false  
+            },
+            yukari : {
+                pressed : false
+               
+            },
+            space : {
+                pressed : false
+            }
+          }
+     
+
+            function animate()
+            {
+                // tekrar kendisini çağıran animate fonksiyonu
+                requestAnimationFrame(animate)
+               // oyuncu arkasında iz bırakır bırakmasın diye
+                ctx.clearRect(0,0,canvas.width,canvas.height)
+                backgroundd.draw()
+
+       if(oyuncu.isGameOver)
+       {
+
+  
+          location.reload();
+       
+       }
+
+        // her bir platformun animate içerisinde 5 birim geriye gibi gözükmesi sağlanır
+                oyuncu.update()
+              platforms.forEach(platform => {
+
+                  platform.draw()
+                  platform.position.x -= 5;
+              })
+
+            
+
+        
+              // düşmanlarda platformla aynı mantıktadır
+          
+            dusmanlar.forEach(dusman =>{
+                if(dusman.yasamak){
+                dusman.draw();
+               dusman.position.x  -=5;
+                }
+            })
+
+            skor.draw()
+
+
+            dusmanlar.forEach(function(dusman) {
+  var dusmansol = dusman.position.x;
+  var dusmansag = dusman.position.x + dusman.width
+  var dusmantop = dusman.position.y
+  var dusmanbottom = dusman.position.y + dusman.height
+
+  const playerLeft = oyuncu.position.x;
+  const playerRight = oyuncu.position.x + oyuncu.width;
+  const playerTop = oyuncu.position.y;
+  const playerBottom = oyuncu.position.y + oyuncu.height;
+                // düşmana değilirse kaybedilir.
+  if (playerLeft < dusmansag && playerRight > dusmansol && playerTop < dusmanbottom && playerBottom > dusmantop) {
+     location.reload();
+
+   
+  }
+});
+
+
+    // hareket fonksiyonları
+                if(tuslar.sag.pressed && oyuncu.position.x < canvas.width-200)
+                {
+                    oyuncu.velocity.x = 5
+                }
+                else if (tuslar.sol.pressed && oyuncu.position.x > 50)
+                {
+                    oyuncu.velocity.x = -5
+                }
+            
+             
+        
+                else {
+                    oyuncu.velocity.x  =0
+                    if(tuslar.sag.pressed)
+                    {
+                      
+                        platforms.forEach(platform =>{
+                            platform.position.x -=5
+                        })
+                    }
+    
+                    else if(tuslar.sol.pressed)
+                    {
+                        platforms.forEach(platform =>{
+                            platform.position.x +=5
+                        })
+                    }
+                    
+                }
+                // oyuncu platform üzerinde kalmasının kontrolü ve ona göre y hızının sıfırlanması
+                platforms.forEach(platform => {
+
+                    if(oyuncu.position.y + oyuncu.height <= platform.position.y
+                        &&  oyuncu.velocity.y + oyuncu.height + oyuncu.position.y >= platform.position.y
+                        &&  oyuncu.position.x + oyuncu.width + oyuncu.velocity.x  >= platform.position.x 
+                        && oyuncu.position.x <= platform.position.x + platform.width + oyuncu.velocity.x
+                        
+
+                        )
+                        {
+                            oyuncu.velocity.y  = 0
+                           
+                        }
+
+                        else if (oyuncu.position.x + oyuncu.width >= platform.position.x && 
+        oyuncu.position.x + oyuncu.width <= platform.position.x + oyuncu.velocity.x &&
+         
+        oyuncu.position.y < platform.position.y + platform.height)
+    {
+        oyuncu.velocity.x = 0;
+        
+    }
+          
+                })
+
+               
+
+            }
+
+            animate()
+
+           // klavye kontrolleri
+            window.addEventListener("keydown", function(e){
+                if(e.keyCode == 65)
+                {
+                    tuslar.sol.pressed = true;
+                }
+                else if (e.keyCode == 87)
+                {
+                    tuslar.yukari.pressed = true
+                   oyuncu.velocity.y -=10
+                   
+                }
+                else if(e.keyCode == 32)
+                {
+                    tuslar.space.pressed = true
+                }
+              
+                else if(e.keyCode == 68)
+                {
+                    tuslar.sag.pressed = true;
+                }
+            })
+
+
+            window.addEventListener("keyup", function(e){
+                if(e.keyCode == 65)
+                {
+                    tuslar.sol.pressed = false;
+                }
+                else if(e.keyCode == 87)
+                {
+                    tuslar.yukari.pressed = false;
+                }
+                else if(e.keyCode == 68)
+                {
+                    tuslar.sag.pressed = false;
+                }
+                else if(e.keyCode == 32)
+                {
+                    tuslar.space.pressed = false
+                }
+            })
+           
+
+        }
+           
+        </script>
+    </body>
+</html>
